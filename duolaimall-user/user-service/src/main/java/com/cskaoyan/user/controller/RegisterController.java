@@ -4,17 +4,12 @@ import com.cskaoyan.mall.commons.constant.SysRetCodeConstants;
 import com.cskaoyan.mall.commons.result.ResponseData;
 import com.cskaoyan.mall.commons.result.ResponseUtil;
 import com.cskaoyan.mall.commons.util.CookieUtil;
-import com.cskaoyan.user.dto.KaptchaCodeRequest;
-import com.cskaoyan.user.dto.KaptchaCodeResponse;
-import com.cskaoyan.user.dto.UserRegisterRequest;
-import com.cskaoyan.user.dto.UserRegisterResponse;
+import com.cskaoyan.user.dto.*;
 import com.cskaoyan.user.service.IKaptchaService;
 import com.cskaoyan.user.service.IRegisterService;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.Map;
@@ -54,5 +49,21 @@ public class RegisterController {
             return new ResponseUtil<>().setData(null);
         }
         return new ResponseUtil<>().setErrorMsg(registerResponse.getMsg());
+    }
+
+    @GetMapping("/verify")
+    public ResponseData register(@RequestParam String uuid, @RequestParam String username, HttpServletRequest request){
+        if(!(StringUtils.isNotBlank(uuid) &&  StringUtils.isNotBlank(username))){
+            return new ResponseUtil<>().setErrorMsg("注册序号/用户名不允许为空");
+        }
+        UserVerifyRequest userVerifyRequest = new UserVerifyRequest();
+        userVerifyRequest.setUserName(username);
+        userVerifyRequest.setUuid(uuid);
+        UserVerifyResponse userVerifyResponse = iRegisterService.verifyMemer(userVerifyRequest);
+        if(userVerifyResponse.getCode().equals(SysRetCodeConstants.SUCCESS.getCode())) {
+            return new ResponseUtil().setData(null);
+        }else{
+            return new ResponseUtil().setData(userVerifyResponse.getMsg());
+        }
     }
 }
