@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="CompilerConfiguration">
+    <annotationProcessing>
+      <profile default="true" name="Default" enabled="true" />
+      <profile name="Maven default annotation processors profile" enabled="true">
+        <sourceOutputDir name="target/generated-sources/annotations" />
+        <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
+        <outputRelativeToContentRoot value="true" />
+        <module name="shopping-api" />
+        <module name="user-api" />
+        <module name="duolaimall-common" />
+        <module name="duolaimall-gateway" />
+        <module name="order-service" />
+        <module name="user-service" />
+        <module name="order-api" />
+        <module name="shopping-service" />
+      </profile>
+    </annotationProcessing>
+  </component>
+</project>
