@@ -39,6 +39,16 @@ public class LoginController {
     @Value("${captchaFlag}")
     private boolean captchaFlag;
 
+    /**
+     * 用户登录
+     *
+     * @param map
+     * @param request
+     * @param response
+     * @return com.cskaoyan.mall.commons.result.ResponseData
+     * @author Jingdian Li
+     * @since 2022/05/27 6:45
+     */
     @PostMapping(value = "/login")
     public ResponseData login(@RequestBody Map<String, String> map, HttpServletRequest request,
         HttpServletResponse response) {
@@ -67,6 +77,14 @@ public class LoginController {
         return new ResponseUtil().setErrorMsg(userLoginResponse.getMsg());
     }
 
+    /**
+     * 验证用户登陆状态
+     *
+     * @param request
+     * @return com.cskaoyan.mall.commons.result.ResponseData
+     * @author Jingdian Li
+     * @since 2022/05/27 6:46
+     */
     @GetMapping("/login")
     public ResponseData checkLogin(HttpServletRequest request) {
         String userInfo = (String)request.getAttribute("access_token");
@@ -74,4 +92,28 @@ public class LoginController {
         return new ResponseUtil().setData(object);
     }
 
+    /**
+     * 退出登录
+     *
+     * @param request
+     * @param response
+     * @return com.cskaoyan.mall.commons.result.ResponseData
+     * @author Jingdian Li
+     * @since 2022/05/27 6:46
+     */
+    @GetMapping("/loginOut")
+    public ResponseData loginOut(HttpServletRequest request, HttpServletResponse response) {
+        Cookie[] cookies = request.getCookies();
+        if (null != cookies) {
+            for (Cookie cookie : cookies) {
+                if (cookie.getName().equals("access_token")) {
+                    cookie.setValue(null);
+                    cookie.setMaxAge(0); // 立即销毁cookie
+                    cookie.setPath("/");
+                    response.addCookie(cookie); // 覆盖原来的token
+                }
+            }
+        }
+        return new ResponseUtil().setData(null);
+    }
 }
