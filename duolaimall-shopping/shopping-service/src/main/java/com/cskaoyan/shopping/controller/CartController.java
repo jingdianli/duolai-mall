@@ -122,7 +122,14 @@ public class CartController {
      */
     @PutMapping("/items")
     public ResponseData checkCarts(@RequestBody CartForm cartForm) {
-        return null;
+        CheckAllItemRequest request = new CheckAllItemRequest();
+        request.setChecked(cartForm.getChecked());
+        request.setUserId(cartForm.getUserId());
+        CheckAllItemResponse response = cartService.checkAllCartItem(request);
+        if (response.getCode().equals(ShoppingRetCode.SUCCESS.getCode())) {
+            return new ResponseUtil().setData(response.getMsg());
+        }
+        return new ResponseUtil().setErrorMsg(response.getMsg());
     }
 
     /**

@@ -125,20 +125,34 @@ public class CartServiceImpl implements ICartService {
 
     @Override
     public CheckAllItemResponse checkAllCartItem(CheckAllItemRequest request) {
-        return null;
+        CheckAllItemResponse response = new CheckAllItemResponse();
+        try {
+            RMap items = redissonClient.getMap(generatorCartItemKey(request.getUserId()));
+            items.values().forEach(obj -> {
+                CartProductDto cartProductDto = (CartProductDto)obj;
+                cartProductDto.setChecked(request.getChecked());// true / false
+                items.put(cartProductDto.getProductId(), cartProductDto);
+            });
+            response.setCode(ShoppingRetCode.SUCCESS.getCode());
+            response.setMsg(ShoppingRetCode.SUCCESS.getMessage());
+        } catch (Exception e) {
+            log.error("CartServiceImpl.checkAllCartItem Occur Exception :" + e);
+            ExceptionProcessorUtils.wrapperHandlerException(response, e);
+        }
+        return response;
     }
 
     @Override
     public DeleteCartItemResponse deleteCartItem(DeleteCartItemRequest request) {
-        DeleteCartItemResponse response=new DeleteCartItemResponse();
-        try{
-            RMap rMap=redissonClient.getMap(generatorCartItemKey(request.getUserId()));
+        DeleteCartItemResponse response = new DeleteCartItemResponse();
+        try {
+            RMap rMap = redissonClient.getMap(generatorCartItemKey(request.getUserId()));
             rMap.remove(request.getItemId());
             response.setCode(ShoppingRetCode.SUCCESS.getCode());
             response.setMsg(ShoppingRetCode.SUCCESS.getMessage());
-        }catch (Exception e){
-            log.error("CartServiceImpl.deleteCartItem Occur Exception :"+e);
-            ExceptionProcessorUtils.wrapperHandlerException(response,e);
+        } catch (Exception e) {
+            log.error("CartServiceImpl.deleteCartItem Occur Exception :" + e);
+            ExceptionProcessorUtils.wrapperHandlerException(response, e);
         }
         return response;
     }
