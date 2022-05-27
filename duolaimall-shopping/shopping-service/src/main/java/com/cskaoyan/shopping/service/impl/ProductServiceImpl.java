@@ -2,11 +2,9 @@ package com.cskaoyan.shopping.service.impl;
 
 import com.alibaba.fastjson.JSON;
 import com.cskaoyan.mall.constant.ShoppingRetCode;
-import com.cskaoyan.mall.dto.AllItemResponse;
-import com.cskaoyan.mall.dto.ProductDetailDto;
-import com.cskaoyan.mall.dto.ProductDetailRequest;
-import com.cskaoyan.mall.dto.ProductDetailResponse;
+import com.cskaoyan.mall.dto.*;
 import com.cskaoyan.shopping.constants.GlobalConstants;
+import com.cskaoyan.shopping.converter.ProductConverter;
 import com.cskaoyan.shopping.dal.entitys.Item;
 import com.cskaoyan.shopping.dal.entitys.ItemDesc;
 import com.cskaoyan.shopping.dal.persistence.ItemDescMapper;
@@ -17,12 +15,16 @@ import com.cskaoyan.shopping.dto.RecommendResponse;
 import com.cskaoyan.shopping.service.IProductService;
 import com.cskaoyan.shopping.service.cache.CacheManager;
 import com.cskaoyan.shopping.utils.ExceptionProcessorUtils;
+import com.github.pagehelper.PageHelper;
+import com.github.pagehelper.PageInfo;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 /**
  * @author Jingdian Li
@@ -40,6 +42,9 @@ public class ProductServiceImpl implements IProductService {
 
     @Autowired
     ItemDescMapper itemDescMapper;
+
+    @Autowired
+    ProductConverter productConverter;
 
     @Override
     public ProductDetailResponse getProductDetail(ProductDetailRequest request) {
@@ -84,7 +89,32 @@ public class ProductServiceImpl implements IProductService {
 
     @Override
     public AllProductResponse getAllProduct(AllProductRequest request) {
-        return null;
+        AllProductResponse response = new AllProductResponse();
+        response.setCode(ShoppingRetCode.SUCCESS.getCode());
+        response.setMsg(ShoppingRetCode.SUCCESS.getMessage());
+        try {
+            List<ProductDto> productDtos = new ArrayList<>();
+            PageHelper.startPage(request.getPage(), request.getSize());
+            String orderCol = "created";
+            String orderDir = "desc";
+            if (request.getSort().equals("1")) {
+                orderCol = "price";
+                orderDir = "asc";
+            } else if (request.getSort().equals("-1")) {
+                orderCol = "price";
+                orderDir = "desc";
+            }
+            List<Item> items = itemMapper.selectItemFront(request.getCid(), orderCol, orderDir, request.getPriceGt(),
+                request.getPriceLte());
+            PageInfo<Item> pageInfo = new PageInfo<>(items);
+            List<ProductDto> productDtosList = productConverter.items2Dto(items);
+            response.setProductDtoList(productDtosList);
+            response.setTotal(pageInfo.getTotal());
+        } catch (Exception e) {
+            log.error("ProductServiceImpl.getAllProduct Occur Exception :" + e);
+            ExceptionProcessorUtils.wrapperHandlerException(response, e);
+        }
+        return response;
     }
 
     @Override
