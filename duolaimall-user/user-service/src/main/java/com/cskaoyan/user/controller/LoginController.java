@@ -1,12 +1,10 @@
 package com.cskaoyan.user.controller;
 
 import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONObject;
 import com.cskaoyan.mall.commons.constant.SysRetCodeConstants;
 import com.cskaoyan.mall.commons.result.ResponseData;
 import com.cskaoyan.mall.commons.result.ResponseUtil;
 import com.cskaoyan.mall.commons.util.CookieUtil;
-import com.cskaoyan.user.constants.UserRetCode;
 import com.cskaoyan.user.dto.KaptchaCodeRequest;
 import com.cskaoyan.user.dto.KaptchaCodeResponse;
 import com.cskaoyan.user.dto.UserLoginRequest;
@@ -87,7 +85,7 @@ public class LoginController {
      */
     @GetMapping("/login")
     public ResponseData checkLogin(HttpServletRequest request) {
-        String userInfo = (String)request.getAttribute("access_token");
+        String userInfo = request.getHeader("user_info");
         Object object = JSON.parse(userInfo);
         return new ResponseUtil().setData(object);
     }
