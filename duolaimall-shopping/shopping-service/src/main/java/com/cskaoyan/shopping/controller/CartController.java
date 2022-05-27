@@ -142,6 +142,13 @@ public class CartController {
      */
     @DeleteMapping("/items/{id}")
     public ResponseData deleteCheckCartItem(@PathVariable("id") Long id) {
-        return null;
+        DeleteCheckedItemRequest request = new DeleteCheckedItemRequest();
+        request.setUserId(id);
+        request.setUserId(request.getUserId());
+        DeleteCheckedItemResposne response = cartService.deleteCheckedItem(request);
+        if (response.getCode().equals(ShoppingRetCode.SUCCESS.getCode())) {
+            return new ResponseUtil().setData(response.getMsg());
+        }
+        return new ResponseUtil().setErrorMsg(response.getMsg());
     }
 }
