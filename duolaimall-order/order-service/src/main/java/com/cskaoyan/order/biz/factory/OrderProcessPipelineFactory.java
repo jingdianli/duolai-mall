@@ -15,15 +15,15 @@ import org.springframework.stereotype.Service;
 public class OrderProcessPipelineFactory extends AbstranctTransPipelineFactory<CreateOrderRequest> {
 
     @Autowired
-    private InitOrderHandler initOrderHandler;
-    @Autowired
     private ValidateHandler validateHandler;
+    @Autowired
+    private SubStockHandler subStockHandler;
+    @Autowired
+    private InitOrderHandler initOrderHandler;
     @Autowired
     private LogisticalHandler logisticalHandler;
     @Autowired
     private ClearCartItemHandler clearCartItemHandler;
-    @Autowired
-    private SubStockHandler subStockHandler;
     @Autowired
     private SendMessageHandler sendMessageHandler;
 

@@ -52,3 +52,4 @@ logging:
     com:
       evan:
         dao: DEBUG
+    com.cskaoyan.order.api.UserFeignClient: debug

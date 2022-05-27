@@ -43,6 +43,12 @@ spring:
     username: noreply_duolaimall@yeah.net
     password: LEZYIEXHRNGEXWGN
 
+  jackson:
+    date-format: yyyy-MM-dd HH:mm:ss
+    time-zone: GMT+8
+    serialization:
+      write-dates-as-timestamps: false
+
 email:
   text: http://localhost:${server.port}/user/verify?username=%s&uuid=%s
 
