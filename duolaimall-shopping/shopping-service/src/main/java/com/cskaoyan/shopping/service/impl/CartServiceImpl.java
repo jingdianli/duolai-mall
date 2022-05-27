@@ -1,6 +1,7 @@
 package com.cskaoyan.shopping.service.impl;
 
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
 import com.cskaoyan.mall.constant.ShoppingRetCode;
 import com.cskaoyan.mall.dto.ClearCartItemRequest;
 import com.cskaoyan.mall.dto.ClearCartItemResponse;
@@ -19,7 +20,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
+import java.util.Map;
 
 /**
  * @author Jingdian Li
@@ -37,33 +38,22 @@ public class CartServiceImpl implements ICartService {
 
     @Override
     public CartListByIdResponse getCartListById(CartListByIdRequest request) {
-        Long userId = request.getUserId();
-        CartListByIdResponse cartListByIdResponse = new CartListByIdResponse();
+        CartListByIdResponse response = new CartListByIdResponse();
+        List<CartProductDto> productDtos = new ArrayList<>();
+        response.setCode(ShoppingRetCode.SUCCESS.getCode());
+        response.setMsg(ShoppingRetCode.SUCCESS.getMessage());
         try {
-            RMap<String, CartProductDto> map = redissonClient.getMap(userId.toString());
-            List<CartProductDto> cartProductDtoList = new ArrayList<>();
-            if (map == null) {
-                // 若购物车为空
-                cartProductDtoList = null;
-                cartListByIdResponse.setCartProductDtos(cartProductDtoList);
-            } else {
-                // 若购物车不为空，拿到购物车中所有产品的productId,即key的集合。
-                Set<String> keySet = map.keySet();
-                // 根据所有的key值，得到所有对应的产品对象集合
-                for (String item : keySet) {
-                    CartProductDto cartProductDto = map.get(item);
-                    cartProductDtoList.add(cartProductDto);
-                }
-                cartListByIdResponse.setCartProductDtos(cartProductDtoList);
-            }
-            cartListByIdResponse.setCode(ShoppingRetCode.SUCCESS.getCode());
-            cartListByIdResponse.setMsg(ShoppingRetCode.SUCCESS.getMessage());
+            Map<Object, Object> items = redissonClient.getMap(generatorCartItemKey(request.getUserId()));
+            items.values().forEach(obj -> {
+                CartProductDto cartProductDto = JSONObject.parseObject(obj.toString(), CartProductDto.class);
+                productDtos.add(cartProductDto);
+            });
+            response.setCartProductDtos(productDtos);
         } catch (Exception e) {
-            e.printStackTrace();
-            cartListByIdResponse.setCode(ShoppingRetCode.DB_EXCEPTION.getCode());
-            cartListByIdResponse.setMsg(ShoppingRetCode.DB_EXCEPTION.getMessage());
+            log.error("CartServiceImpl.getCartListById Occur Exception :" + e);
+            ExceptionProcessorUtils.wrapperHandlerException(response, e);
         }
-        return cartListByIdResponse;
+        return response;
     }
 
     @Override
