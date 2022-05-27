@@ -7,6 +7,7 @@ import com.cskaoyan.mall.dto.ProductDetailRequest;
 import com.cskaoyan.mall.dto.ProductDetailResponse;
 import com.cskaoyan.shopping.dto.AllProductRequest;
 import com.cskaoyan.shopping.dto.AllProductResponse;
+import com.cskaoyan.shopping.dto.RecommendResponse;
 import com.cskaoyan.shopping.form.PageInfo;
 import com.cskaoyan.shopping.form.PageResponse;
 import com.cskaoyan.shopping.service.IProductService;
@@ -83,6 +84,10 @@ public class ProductController {
      */
     @GetMapping("/recommend")
     public ResponseData recommend() {
-        return null;
+        RecommendResponse response = productService.getRecommendGoods();
+        if (response.getCode().equals(ShoppingRetCode.SUCCESS.getCode())) {
+            return new ResponseUtil().setData(response.getPanelContentItemDtos());
+        }
+        return new ResponseUtil().setErrorMsg(response.getMsg());
     }
 }

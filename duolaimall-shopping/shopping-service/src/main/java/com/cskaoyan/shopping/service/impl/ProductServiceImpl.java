@@ -4,13 +4,19 @@ import com.alibaba.fastjson.JSON;
 import com.cskaoyan.mall.constant.ShoppingRetCode;
 import com.cskaoyan.mall.dto.*;
 import com.cskaoyan.shopping.constants.GlobalConstants;
+import com.cskaoyan.shopping.converter.ContentConverter;
 import com.cskaoyan.shopping.converter.ProductConverter;
 import com.cskaoyan.shopping.dal.entitys.Item;
 import com.cskaoyan.shopping.dal.entitys.ItemDesc;
+import com.cskaoyan.shopping.dal.entitys.Panel;
+import com.cskaoyan.shopping.dal.entitys.PanelContentItem;
 import com.cskaoyan.shopping.dal.persistence.ItemDescMapper;
 import com.cskaoyan.shopping.dal.persistence.ItemMapper;
+import com.cskaoyan.shopping.dal.persistence.PanelContentMapper;
+import com.cskaoyan.shopping.dal.persistence.PanelMapper;
 import com.cskaoyan.shopping.dto.AllProductRequest;
 import com.cskaoyan.shopping.dto.AllProductResponse;
+import com.cskaoyan.shopping.dto.PanelDto;
 import com.cskaoyan.shopping.dto.RecommendResponse;
 import com.cskaoyan.shopping.service.IProductService;
 import com.cskaoyan.shopping.service.cache.CacheManager;
@@ -22,9 +28,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 
 /**
  * @author Jingdian Li
@@ -45,6 +49,15 @@ public class ProductServiceImpl implements IProductService {
 
     @Autowired
     ProductConverter productConverter;
+
+    @Autowired
+    PanelMapper panelMapper;
+
+    @Autowired
+    PanelContentMapper panelContentMapper;
+
+    @Autowired
+    ContentConverter contentConverter;
 
     @Override
     public ProductDetailResponse getProductDetail(ProductDetailRequest request) {
@@ -119,7 +132,42 @@ public class ProductServiceImpl implements IProductService {
 
     @Override
     public RecommendResponse getRecommendGoods() {
-        return null;
+        RecommendResponse response = new RecommendResponse();
+        response.setCode(ShoppingRetCode.SUCCESS.getCode());
+        response.setMsg(ShoppingRetCode.SUCCESS.getMessage());
+        try {
+
+            String json = cacheManager.checkCache(GlobalConstants.RECOMMEND_PANEL_CACHE_KEY);
+            if (StringUtils.isNotBlank(json)) {
+                List<PanelDto> panelContentItemDtoList = JSON.parseArray(json, PanelDto.class);
+                Set<PanelDto> panelDtoSet = new HashSet<>(panelContentItemDtoList);
+                response.setPanelContentItemDtos(panelDtoSet);
+                return response;
+            }
+            List<Panel> panels = panelMapper.selectPanelContentById(GlobalConstants.RECOMMEND_PANEL_ID);
+
+            System.out.println(panels);
+            if (panels == null || panels.isEmpty()) {
+                return response;
+            }
+            Set<PanelDto> panelContentItemDtos = new HashSet<PanelDto>();
+            panels.parallelStream().forEach(panel -> {
+                List<PanelContentItem> panelContentItems =
+                    panelContentMapper.selectPanelContentAndProductWithPanelId(panel.getId());
+                PanelDto panelDto = contentConverter.panel2Dto(panel);
+                panelDto.setPanelContentItems(contentConverter.panelContentItem2Dto(panelContentItems));
+                panelContentItemDtos.add(panelDto);
+            });
+
+            response.setPanelContentItemDtos(panelContentItemDtos);
+            cacheManager.setCache(GlobalConstants.RECOMMEND_PANEL_CACHE_KEY, JSON.toJSONString(panelContentItemDtos),
+                GlobalConstants.RECOMMEND_CACHE_EXPIRE);
+
+        } catch (Exception e) {
+            log.error("ProductServiceImpl.getAllProduct Occur Exception :" + e);
+            ExceptionProcessorUtils.wrapperHandlerException(response, e);
+        }
+        return response;
     }
 
     @Override
