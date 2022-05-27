@@ -3,8 +3,10 @@ package com.cskaoyan.shopping.controller;
 import com.cskaoyan.mall.commons.result.ResponseData;
 import com.cskaoyan.mall.commons.result.ResponseUtil;
 import com.cskaoyan.mall.constant.ShoppingRetCode;
+import com.cskaoyan.shopping.dto.HomePageResponse;
 import com.cskaoyan.shopping.dto.NavListResponse;
 import com.cskaoyan.shopping.service.IContentService;
+import com.cskaoyan.shopping.service.IHomeService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -20,6 +22,9 @@ import org.springframework.web.bind.annotation.RestController;
 public class HomeController {
     @Autowired
     IContentService contentService;
+
+    @Autowired
+    IHomeService homeService;
 
     /**
      * 导航栏显示
@@ -42,10 +47,14 @@ public class HomeController {
      *
      * @return com.cskaoyan.mall.commons.result.ResponseData
      * @author Jingdian Li
-     * @since 2022/05/27 7:44
-     */
+     * @since 2022/05/27 8:53
+    */
     @GetMapping("/homepage")
     public ResponseData homepage() {
-        return null;
+        HomePageResponse response=homeService.homepage();
+        if(response.getCode().equals(ShoppingRetCode.SUCCESS.getCode())) {
+            return new ResponseUtil().setData(response.getPanelContentItemDtos());
+        }
+        return new ResponseUtil().setErrorMsg(response.getMsg());
     }
 }

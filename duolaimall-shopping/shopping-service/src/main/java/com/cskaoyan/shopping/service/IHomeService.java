@@ -5,8 +5,12 @@ import com.cskaoyan.shopping.dto.HomePageResponse;
 
 public interface IHomeService {
 
-    /*
-         显示首页商品信息，显示的是
+    /**
+     * 获取主页
+     *
+     * @return com.cskaoyan.shopping.dto.HomePageResponse
+     * @author Jingdian Li
+     * @since 2022/05/27 8:41 
      */
     HomePageResponse homepage();
 }
