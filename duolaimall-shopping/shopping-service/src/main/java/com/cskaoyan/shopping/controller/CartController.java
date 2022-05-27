@@ -5,6 +5,8 @@ import com.alibaba.fastjson.JSONObject;
 import com.cskaoyan.mall.commons.result.ResponseData;
 import com.cskaoyan.mall.commons.result.ResponseUtil;
 import com.cskaoyan.mall.constant.ShoppingRetCode;
+import com.cskaoyan.shopping.dto.AddCartRequest;
+import com.cskaoyan.shopping.dto.AddCartResponse;
 import com.cskaoyan.shopping.dto.CartListByIdRequest;
 import com.cskaoyan.shopping.dto.CartListByIdResponse;
 import com.cskaoyan.shopping.form.CartForm;
@@ -56,7 +58,15 @@ public class CartController {
      */
     @PostMapping("/carts")
     public ResponseData carts(@RequestBody CartForm cartForm) {
-        return null;
+        AddCartRequest addCartRequest = new AddCartRequest();
+        addCartRequest.setUserId(cartForm.getUserId());
+        addCartRequest.setItemId(cartForm.getProductId());
+        addCartRequest.setNum(cartForm.getProductNum());
+        AddCartResponse addCartResponse = cartService.addToCart(addCartRequest);
+        if (ShoppingRetCode.SUCCESS.getCode().equals(addCartResponse.getCode())) {
+            return new ResponseUtil().setData("成功");
+        }
+        return new ResponseUtil().setErrorMsg(addCartResponse.getMsg());
     }
 
     /**
