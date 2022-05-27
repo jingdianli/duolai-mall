@@ -130,7 +130,17 @@ public class CartServiceImpl implements ICartService {
 
     @Override
     public DeleteCartItemResponse deleteCartItem(DeleteCartItemRequest request) {
-        return null;
+        DeleteCartItemResponse response=new DeleteCartItemResponse();
+        try{
+            RMap rMap=redissonClient.getMap(generatorCartItemKey(request.getUserId()));
+            rMap.remove(request.getItemId());
+            response.setCode(ShoppingRetCode.SUCCESS.getCode());
+            response.setMsg(ShoppingRetCode.SUCCESS.getMessage());
+        }catch (Exception e){
+            log.error("CartServiceImpl.deleteCartItem Occur Exception :"+e);
+            ExceptionProcessorUtils.wrapperHandlerException(response,e);
+        }
+        return response;
     }
 
     @Override

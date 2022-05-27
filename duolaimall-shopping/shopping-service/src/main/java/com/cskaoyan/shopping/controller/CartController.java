@@ -101,7 +101,15 @@ public class CartController {
      */
     @DeleteMapping("/carts/{uid}/{pid}")
     public ResponseData deleteCarts(@PathVariable("uid") long uid, @PathVariable("pid") long pid) {
-        return null;
+        DeleteCartItemRequest request = new DeleteCartItemRequest();
+        request.setUserId(uid);
+        request.setItemId(pid);
+
+        DeleteCartItemResponse response = cartService.deleteCartItem(request);
+        if (response.getCode().equals(ShoppingRetCode.SUCCESS.getCode())) {
+            return new ResponseUtil().setData(response.getMsg());
+        }
+        return new ResponseUtil().setErrorMsg(response.getMsg());
     }
 
     /**
