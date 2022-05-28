@@ -83,7 +83,19 @@ public class OrderCoreServiceImpl implements OrderCoreService {
 
     @Override
     public DeleteOrderResponse deleteOrder(DeleteOrderRequest request) {
-        return null;
+
+        DeleteOrderResponse deleteOrderResponse = new DeleteOrderResponse();
+
+        try {
+            request.requestCheck();
+            deleteOrderWithTransaction(request);
+            deleteOrderResponse.setCode(OrderRetCode.SUCCESS.getCode());
+            deleteOrderResponse.setMsg(OrderRetCode.SUCCESS.getMessage());
+        } catch (Exception e) {
+            log.error("OrderCoreServiceImpl.deleteOrder Occur Exception :" + e);
+            ExceptionProcessorUtils.wrapperHandlerException(deleteOrderResponse, e);
+        }
+        return deleteOrderResponse;
     }
 
     @Override

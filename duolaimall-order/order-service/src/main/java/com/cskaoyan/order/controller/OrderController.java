@@ -145,6 +145,9 @@ public class OrderController {
      */
     @DeleteMapping("/order/{id}")
     public ResponseData deleteOrder(@PathVariable String id) {
-        return null;
+        DeleteOrderRequest deleteOrderRequest = new DeleteOrderRequest();
+        deleteOrderRequest.setOrderId(id);
+        DeleteOrderResponse deleteOrderResponse = orderCoreService.deleteOrder(deleteOrderRequest);
+        return new ResponseUtil<>().setData(deleteOrderResponse);
     }
 }
