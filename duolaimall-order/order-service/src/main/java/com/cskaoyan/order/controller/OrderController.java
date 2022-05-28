@@ -129,7 +129,12 @@ public class OrderController {
     */
     @PostMapping("/cancelOrder")
     public ResponseData cancelOrder(@RequestBody CancelOrderForm cancelOrderForm) {
-        return null;
+        log.info("enter cancelOrder id = {}", cancelOrderForm.getOrderId());
+        CancelOrderRequest cancelOrderRequest = new CancelOrderRequest();
+        cancelOrderRequest.setOrderId(cancelOrderForm.getOrderId());
+        CancelOrderResponse cancelOrderResponse
+                = orderCoreService.cancelOrder(cancelOrderRequest);
+        return new ResponseUtil<>().setData(cancelOrderResponse);
     }
 
     /**
