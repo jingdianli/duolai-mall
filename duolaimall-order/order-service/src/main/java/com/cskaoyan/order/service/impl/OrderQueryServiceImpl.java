@@ -83,7 +83,29 @@ public class OrderQueryServiceImpl implements OrderQueryService {
 
     @Override
     public OrderDetailResponse orderDetail(OrderDetailRequest request) {
-        return null;
+        request.requestCheck();
+
+        OrderDetailResponse orderDetailResponse = new OrderDetailResponse();
+
+        try {
+            Order order = orderMapper.selectByPrimaryKey(request.getOrderId());
+            orderDetailResponse = orderConverter.order2res(order);
+            orderDetailResponse.setCode(OrderRetCode.SUCCESS.getCode());
+            orderDetailResponse.setMsg(OrderRetCode.SUCCESS.getMessage());
+
+            List<OrderItem> orderItems = orderItemMapper.queryByOrderId(order.getOrderId());
+            List<OrderItemDto> orderItemDtos = orderConverter.item2dto(orderItems);
+            orderDetailResponse.setOrderItemDto(orderItemDtos);
+
+            OrderShipping orderShipping = orderShippingMapper.selectByPrimaryKey(order.getOrderId());
+            OrderShippingDto orderShippingDto = orderConverter.shipping2dto(orderShipping);
+            orderDetailResponse.setOrderShippingDto(orderShippingDto);
+        } catch (Exception e) {
+            log.error("OrderQueryServiceImpl.orderDetail occur Exception :" +e);
+            ExceptionProcessorUtils.wrapperHandlerException(orderDetailResponse, e);
+        }
+
+        return orderDetailResponse;
     }
 
     @Override

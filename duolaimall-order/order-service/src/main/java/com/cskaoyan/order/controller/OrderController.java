@@ -7,6 +7,7 @@ import com.cskaoyan.mall.commons.result.ResponseUtil;
 import com.cskaoyan.mall.order.constant.OrderRetCode;
 import com.cskaoyan.order.dto.*;
 import com.cskaoyan.order.form.CancelOrderForm;
+import com.cskaoyan.order.form.OrderDetail;
 import com.cskaoyan.order.form.PageInfo;
 import com.cskaoyan.order.form.PageResponse;
 import com.cskaoyan.order.service.OrderCoreService;
@@ -100,7 +101,22 @@ public class OrderController {
     */
     @GetMapping("/order/{id}")
     public ResponseData orderDetail(@PathVariable("id") String orderId) {
-        return null;
+        OrderDetailRequest orderDetailRequest = new OrderDetailRequest();
+        orderDetailRequest.setOrderId(orderId);
+
+        OrderDetailResponse orderDetailResponse = orderQueryService.orderDetail(orderDetailRequest);
+        if (orderDetailResponse.getCode().equals(OrderRetCode.SUCCESS.getCode())) {
+            OrderDetail orderDetail = new OrderDetail();
+            orderDetail.setOrderTotal(orderDetailResponse.getPayment());
+            orderDetail.setUserId(orderDetailResponse.getUserId());
+            orderDetail.setUserName(orderDetailResponse.getBuyerNick());
+            orderDetail.setGoodsList(orderDetailResponse.getOrderItemDto());
+            orderDetail.setTel(orderDetailResponse.getOrderShippingDto().getReceiverPhone());
+            orderDetail.setStreetName(orderDetailResponse.getOrderShippingDto().getReceiverAddress());
+            orderDetail.setOrderStatus(orderDetailResponse.getStatus());
+            return new ResponseUtil<>().setData(orderDetail);
+        }
+        return new ResponseUtil<>().setErrorMsg(orderDetailResponse.getMsg());
     }
 
     /**
