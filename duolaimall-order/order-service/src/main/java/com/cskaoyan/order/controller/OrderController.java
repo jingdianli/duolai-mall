@@ -8,7 +8,9 @@ import com.cskaoyan.mall.order.constant.OrderRetCode;
 import com.cskaoyan.order.dto.*;
 import com.cskaoyan.order.form.CancelOrderForm;
 import com.cskaoyan.order.form.PageInfo;
+import com.cskaoyan.order.form.PageResponse;
 import com.cskaoyan.order.service.OrderCoreService;
+import com.cskaoyan.order.service.OrderQueryService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -27,6 +29,9 @@ import java.util.UUID;
 public class OrderController {
     @Autowired
     OrderCoreService orderCoreService;
+
+    @Autowired
+    OrderQueryService orderQueryService;
     /**
      * 创建订单
      *
@@ -64,7 +69,25 @@ public class OrderController {
     @GetMapping("/order")
     public ResponseData userOrders(PageInfo pageInfo, HttpServletRequest request) {
 
-        return null;
+        OrderListRequest orderListRequest = new OrderListRequest();
+        orderListRequest.setPage(pageInfo.getPage());
+        orderListRequest.setSize(pageInfo.getSize());
+        orderListRequest.setSort(pageInfo.getSort());
+
+        String token = (String) request.getHeader("user_info");
+        JSONObject tokenJson = JSON.parseObject(token);
+        Long uid = tokenJson.getLong("uid");
+        orderListRequest.setUserId(uid);
+
+        OrderListResponse orderListResponse = orderQueryService.orderList(orderListRequest);
+        if (orderListResponse.getCode().equals(OrderRetCode.SUCCESS.getCode())) {
+
+            PageResponse pageResponse = new PageResponse();
+            pageResponse.setData(orderListResponse.getDetailInfoList());
+            pageResponse.setTotal(orderListResponse.getTotal());
+            return new ResponseUtil<>().setData(pageResponse);
+        }
+        return new ResponseUtil<>().setErrorMsg(orderListResponse.getMsg());
     }
 
     /**
