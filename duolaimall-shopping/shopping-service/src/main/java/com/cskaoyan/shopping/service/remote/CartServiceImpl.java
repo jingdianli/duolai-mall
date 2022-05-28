@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.RestController;
  * @since 2022/05/28 08:23
  */
 
-@RestController
+@RestController("remoteCartServiceImpl")
 public class CartServiceImpl implements CartService {
     @Autowired
     ICartService cartService;
